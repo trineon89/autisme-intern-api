@@ -8,6 +8,24 @@ servers:
 security:
   - bearerAuth: []
 paths:
+  /:
+    get:
+      security: []
+      summary: Browser endpoint overview and JSON service descriptor
+      responses:
+        '200': { description: Endpoint overview HTML for browsers or JSON descriptor for API clients }
+  /docs:
+    get:
+      security: []
+      summary: Browser endpoint overview
+      responses:
+        '200': { description: Endpoint overview HTML }
+  /docs/openapi.yaml:
+    get:
+      security: []
+      summary: OpenAPI specification
+      responses:
+        '200': { description: OpenAPI YAML }
   /healthz:
     get:
       security: []

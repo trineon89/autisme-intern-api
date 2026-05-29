@@ -28,6 +28,16 @@ Error shape:
 }
 ```
 
+## Browser endpoint overview
+
+Opening the API root in a browser shows a small built-in endpoint overview page:
+
+```text
+https://api2.autisme.lu/
+```
+
+Machine clients that do not send an HTML `Accept` header still receive a JSON service descriptor from `/`. The same browser overview is also available at `/docs`, and the complete OpenAPI file remains available at `/docs/openapi.yaml`.
+
 ## Authentication
 
 | Method | Path | Purpose |
