@@ -7,6 +7,7 @@ const PUBLIC_ROUTES = [
   ['GET', '/healthz'],
   ['GET', '/readyz'],
   ['GET', '/meta'],
+  ['GET', '/docs'],
   ['GET', '/docs/openapi.yaml'],
   ['POST', '/auth/login']
 ];

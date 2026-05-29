@@ -8,6 +8,7 @@ import { securityHeaders } from './middleware/security.js';
 import { corsHook } from './middleware/cors.js';
 import { authHook } from './middleware/auth.js';
 import { registerErrorHandler } from './middleware/error-handler.js';
+import { apiLandingPayload, renderApiLandingHtml } from './docs-landing.js';
 
 import healthRoutes from './modules/health/health.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
@@ -58,13 +59,19 @@ export async function buildApp(options = {}) {
 
   registerErrorHandler(app);
 
-  app.get('/', async () => ({
-    ok: true,
-    name: 'api2.autisme.lu',
-    version: '1.0.0',
-    docs: '/docs/openapi.yaml',
-    health: '/healthz'
-  }));
+  app.get('/', async (request, reply) => {
+    const payload = apiLandingPayload(config);
+    const accept = request.headers.accept || '';
+    if (accept.includes('text/html')) {
+      reply.type('text/html; charset=utf-8').send(renderApiLandingHtml(config));
+      return;
+    }
+    return payload;
+  });
+
+  app.get('/docs', async (_request, reply) => {
+    reply.type('text/html; charset=utf-8').send(renderApiLandingHtml(config));
+  });
 
   app.get('/docs/openapi.yaml', async (_request, reply) => {
     const file = await fs.readFile(path.resolve('docs/openapi.yaml'), 'utf8');
