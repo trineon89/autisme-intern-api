@@ -48,6 +48,23 @@ assert.equal(htmlRoot.statusCode, 200);
 assert.match(htmlRoot.headers['content-type'], /text\/html/);
 assert.match(htmlRoot.body, /api2\.autisme\.lu API explorer/);
 assert.match(htmlRoot.body, /\/docs\/openapi\.yaml/);
+assert.match(htmlRoot.body, /\/assets\/css\/docs-landing\.css/);
+assert.match(htmlRoot.body, /\/assets\/js\/docs-landing\.js/);
+assert.doesNotMatch(htmlRoot.body, /<style[\s>]/i);
+assert.doesNotMatch(htmlRoot.body, /<script>/i);
+assert.match(htmlRoot.headers['content-security-policy'], /script-src 'self'/);
+assert.match(htmlRoot.headers['content-security-policy'], /style-src 'self'/);
+
+
+const cssAsset = await app.inject({ method: 'GET', url: '/assets/css/docs-landing.css' });
+assert.equal(cssAsset.statusCode, 200);
+assert.match(cssAsset.headers['content-type'], /text\/css/);
+assert.match(cssAsset.body, /endpoint-card/);
+
+const jsAsset = await app.inject({ method: 'GET', url: '/assets/js/docs-landing.js' });
+assert.equal(jsAsset.statusCode, 200);
+assert.match(jsAsset.headers['content-type'], /javascript/);
+assert.match(jsAsset.body, /endpoint-search/);
 
 const jsonRoot = await app.inject({ method: 'GET', url: '/', headers: { accept: 'application/json' } });
 assert.equal(jsonRoot.statusCode, 200);

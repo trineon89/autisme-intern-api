@@ -10,6 +10,8 @@ const PUBLIC_ROUTES = [
   ['GET', '/docs'],
   ['GET', '/docs/routes.json'],
   ['GET', '/docs/openapi.yaml'],
+  ['GET', '/assets/css/docs-landing.css'],
+  ['GET', '/assets/js/docs-landing.js'],
   ['POST', '/auth/login']
 ];
 

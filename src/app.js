@@ -62,6 +62,23 @@ export async function buildApp(options = {}) {
 
   registerErrorHandler(app);
 
+
+  app.get('/assets/css/docs-landing.css', async (_request, reply) => {
+    const file = await fs.readFile(path.resolve('public/assets/css/docs-landing.css'), 'utf8');
+    reply
+      .header('Cache-Control', 'public, max-age=3600')
+      .type('text/css; charset=utf-8')
+      .send(file);
+  });
+
+  app.get('/assets/js/docs-landing.js', async (_request, reply) => {
+    const file = await fs.readFile(path.resolve('public/assets/js/docs-landing.js'), 'utf8');
+    reply
+      .header('Cache-Control', 'public, max-age=3600')
+      .type('application/javascript; charset=utf-8')
+      .send(file);
+  });
+
   app.get('/', async (request, reply) => {
     const payload = apiLandingPayload(config, routeRegistry.routes);
     const accept = request.headers.accept || '';
