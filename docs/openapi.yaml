@@ -1,0 +1,353 @@
+openapi: 3.1.0
+info:
+  title: api2.autisme.lu
+  version: 1.0.0
+  description: Modern Node.js API for NamNam and legacy Autisme Luxembourg workflows.
+servers:
+  - url: https://api2.autisme.lu
+security:
+  - bearerAuth: []
+paths:
+  /healthz:
+    get:
+      security: []
+      summary: Process health
+      responses:
+        '200': { description: Healthy }
+  /readyz:
+    get:
+      security: []
+      summary: Database readiness
+      responses:
+        '200': { description: Ready }
+        '503': { description: Not ready }
+  /auth/login:
+    post:
+      security: []
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '201': { description: Bearer token and user }
+        '401': { description: Invalid credentials }
+  /auth/logout:
+    post:
+      summary: Revoke current token
+      responses:
+        '200': { description: Logged out }
+  /auth/me:
+    get:
+      summary: Current user
+      responses:
+        '200': { description: User }
+  /namnam/bootstrap:
+    get:
+      summary: Frontend bootstrap data
+      responses:
+        '200': { description: User, settings, people, places, choices, reserved dates }
+  /people:
+    get:
+      summary: List people
+      parameters:
+        - { name: active, in: query, schema: { type: boolean } }
+        - { name: meal_registration_enabled, in: query, schema: { type: boolean } }
+        - { name: is_encadrant, in: query, schema: { type: boolean } }
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200': { description: List of people }
+    post:
+      summary: Create person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PersonInput' }
+      responses:
+        '201': { description: Created person }
+  /people/{id}:
+    get:
+      summary: Get person
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Person }
+    patch:
+      summary: Update person
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Updated person }
+  /people/{id}/toggle:
+    patch:
+      summary: Toggle person boolean field
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Updated person }
+  /people/{id}/billing-category:
+    patch:
+      summary: Update billing category
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Updated person }
+  /places:
+    get:
+      summary: List places/services
+      responses:
+        '200': { description: List of places }
+    post:
+      summary: Create place/service
+      responses:
+        '201': { description: Created place }
+  /places/{id}:
+    get:
+      summary: Get place/service
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Place }
+    patch:
+      summary: Update place/service
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Updated place }
+  /meal-choices:
+    get:
+      summary: List meal choices
+      responses:
+        '200': { description: Meal choices }
+  /meal-choices/for-day:
+    get:
+      summary: Choices and menu context for one date
+      parameters:
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+        - { name: week, in: query, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Choices and weekly menu context }
+  /base-plans:
+    get:
+      summary: Base plan by person
+      parameters:
+        - { name: person_id, in: query, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Base plan entries }
+    post:
+      summary: Upsert base plan entries
+      responses:
+        '201': { description: Saved entries }
+  /base-plans/by-service:
+    get:
+      summary: Base plans grouped by service
+      responses:
+        '200': { description: Groups }
+  /base-plans/missing:
+    get:
+      summary: Missing meal registrations for date
+      parameters:
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Missing entries }
+  /meal-registrations:
+    get:
+      summary: List meal registrations
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: until, in: query, schema: { type: string, format: date } }
+        - { name: person_id, in: query, schema: { type: integer } }
+        - { name: place_id, in: query, schema: { type: integer } }
+        - { name: meal_choice_id, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: Registrations }
+  /meal-registrations/by-person-date:
+    get:
+      summary: One registration and warnings
+      parameters:
+        - { name: person_id, in: query, required: true, schema: { type: integer } }
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Registration and warnings }
+  /meal-registrations/single:
+    post:
+      summary: Upsert one registration
+      responses:
+        '201': { description: Saved registration }
+  /meal-registrations/week:
+    post:
+      summary: Upsert one week of registrations
+      responses:
+        '201': { description: Saved week }
+  /meal-registrations/return-from-leave:
+    post:
+      summary: Apply registrations after leave
+      responses:
+        '201': { description: Saved registrations }
+  /weekly-menus:
+    get:
+      summary: Get weekly menu
+      parameters:
+        - { name: monday_date, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Weekly menu }
+    post:
+      summary: Upsert weekly menu
+      responses:
+        '201': { description: Saved weekly menu }
+  /weekly-menus/latest:
+    get:
+      summary: Latest weekly menu
+      responses:
+        '200': { description: Weekly menu }
+  /weekly-menus/latest/html:
+    get:
+      summary: Latest menu as HTML
+      responses:
+        '200': { description: HTML }
+  /weekly-menus/latest/mailchimp:
+    get:
+      summary: Latest Mailchimp HTML
+      responses:
+        '200': { description: HTML }
+  /weekly-menus/latest/pdf/{type}:
+    get:
+      summary: Latest PDF export redirect
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string } }
+      responses:
+        '302': { description: Redirect }
+  /menu-assets:
+    get:
+      summary: List menu assets
+      responses:
+        '200': { description: Assets }
+    post:
+      summary: Upload menu asset
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+                kind: { type: string }
+                altText: { type: string }
+      responses:
+        '201': { description: Uploaded asset }
+  /reports/data:
+    get:
+      summary: Report data
+      responses:
+        '200': { description: Grouped registrations }
+  /reports/pdf/general:
+    post:
+      summary: Generate general PDF
+      responses:
+        '201': { description: Generated report }
+  /reports/pdf/kitchen:
+    post:
+      summary: Generate kitchen PDF
+      responses:
+        '201': { description: Generated report }
+  /reports/email/kitchen:
+    post:
+      summary: Queue kitchen email job
+      responses:
+        '202': { description: Email job queued }
+  /reports/generated:
+    get:
+      summary: List generated reports
+      responses:
+        '200': { description: Reports }
+  /reports/generated/{id}:
+    delete:
+      summary: Delete generated report
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '204': { description: Deleted }
+  /settings:
+    get:
+      summary: Settings
+      responses:
+        '200': { description: Settings object }
+    patch:
+      summary: Update settings
+      responses:
+        '200': { description: Updated settings }
+  /reserved-dates:
+    get:
+      summary: List reserved dates
+      responses:
+        '200': { description: Reserved dates }
+    post:
+      summary: Create/update reserved date
+      responses:
+        '201': { description: Saved reserved date }
+  /reserved-dates/{date}:
+    delete:
+      summary: Delete reserved date
+      parameters:
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        '204': { description: Deleted }
+  /reserved-dates/fix-registrations:
+    post:
+      summary: Force no-meal choice on reserved dates
+      responses:
+        '200': { description: Summary }
+  /billing/data:
+    get:
+      summary: Billing data
+      parameters:
+        - { name: month, in: query, required: true, schema: { type: string, pattern: '^\\d{4}-\\d{2}$' } }
+        - { name: category, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Billing rows }
+  /billing/non-billable-dates:
+    get:
+      summary: Non-billable dates
+      responses:
+        '200': { description: Dates }
+    post:
+      summary: Create/update non-billable date
+      responses:
+        '201': { description: Saved date }
+  /billing/non-billable-dates/{date}:
+    delete:
+      summary: Delete non-billable date
+      parameters:
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        '204': { description: Deleted }
+  /import/preview:
+    post:
+      summary: Preview CSV/Access export file
+      responses:
+        '200': { description: Preview }
+  /import/confirm:
+    post:
+      summary: Confirm import
+      responses:
+        '201': { description: Import confirmation }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+  schemas:
+    PersonInput:
+      type: object
+      properties:
+        lastName: { type: string }
+        firstName: { type: string }
+        isEncadrant: { type: boolean }
+        mealRegistrationEnabled: { type: boolean }
+        billingCategory: { type: string }

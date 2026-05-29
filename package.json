@@ -1,0 +1,23 @@
+{
+  "name": "api2-autisme-lu",
+  "version": "1.0.0",
+  "description": "Modern Node.js v24 API for NamNam / Autisme Luxembourg intranet workflows.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "APP_ENV=development node src/server.js",
+    "check": "node tests/run-node-tests.js",
+    "migrate": "node scripts/migrate.js",
+    "create-admin": "node scripts/create-admin.js",
+    "check-env": "node scripts/check-env.js"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^10.0.0",
+    "fastify": "^5.8.5",
+    "mysql2": "^3.22.3"
+  }
+}
