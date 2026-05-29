@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   ['GET', '/readyz'],
   ['GET', '/meta'],
   ['GET', '/docs'],
+  ['GET', '/docs/routes.json'],
   ['GET', '/docs/openapi.yaml'],
   ['POST', '/auth/login']
 ];
