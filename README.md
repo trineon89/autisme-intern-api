@@ -80,6 +80,12 @@ Create the first admin user:
 ADMIN_EMAIL=admin@example.lu ADMIN_PASSWORD='choose-a-strong-password' ADMIN_NAME='Admin' npm run create-admin
 ```
 
+Check the effective non-secret runtime settings:
+
+```bash
+npm run runtime-info
+```
+
 Start the API:
 
 ```bash
@@ -92,7 +98,7 @@ Or directly:
 node src/server.js
 ```
 
-With a custom port:
+For local development with a custom port:
 
 ```bash
 PORT=3000 node src/server.js
@@ -102,14 +108,15 @@ PORT=3000 node src/server.js
 
 ```env
 APP_ENV=production
-HOST=127.0.0.1
-PORT=3000
 API_PUBLIC_URL=https://api2.autisme.lu
 CORS_ORIGINS=https://namnam.autisme.lu
+LISTEN_HOST=0.0.0.0
 AUTH_REQUIRED=true
 SESSION_TTL_HOURS=12
 DB_SSL=false
 ```
+
+On Infomaniak, prefer leaving `PORT` out of `.env` unless the Manager explicitly tells you to use a fixed port. The application reads `process.env.PORT`, which is how Infomaniak passes the configured listening port. Do not set `HOST=127.0.0.1` in production; use `LISTEN_HOST=0.0.0.0` or leave it unset so production defaults to `0.0.0.0`.
 
 Keep these files out of Git:
 
@@ -185,6 +192,19 @@ curl https://api2.autisme.lu/people \
 ```
 
 Server-to-server calls may use `X-API-Key` with `INTERNAL_API_TOKEN` or `LEGACY_API_KEY`. Do not expose these values to browser JavaScript.
+
+## Infomaniak public routing notes
+
+If `npm start` logs that the app is listening but `https://api2.autisme.lu/` shows an Infomaniak maintenance/default page, the public request is not reaching this Node app. In the Infomaniak Node.js site dashboard, verify:
+
+- Execution folder: the folder containing `package.json`.
+- Build command: `npm install --omit=dev`.
+- Start command: `npm start`.
+- Listening port: the same port printed by `npm run runtime-info` / the app log.
+- Domain assignment and SSL for `api2.autisme.lu`.
+- Maintenance mode disabled.
+
+See `docs/DEPLOYMENT_INFOMANIAK.md` and `docs/TROUBLESHOOTING_INFOMANIAK_NODE.md`.
 
 ## Reverse proxy notes
 

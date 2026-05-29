@@ -47,13 +47,22 @@ function list(name, fallback = []) {
   return value.split(',').map((item) => item.trim()).filter(Boolean);
 }
 
+function resolveListenHost(appEnv) {
+  // Use LISTEN_HOST for runtime binding. HOST is kept only for local/backward compatibility.
+  // In production, default to 0.0.0.0 so managed reverse proxies/container routers can reach the app.
+  if (process.env.LISTEN_HOST) return process.env.LISTEN_HOST;
+  if (appEnv !== 'production' && process.env.HOST) return process.env.HOST;
+  return appEnv === 'production' ? '0.0.0.0' : '127.0.0.1';
+}
+
 export function loadEnv() {
   loadDotEnv();
+  const appEnv = process.env.APP_ENV || 'production';
   return Object.freeze({
-    appEnv: process.env.APP_ENV || 'production',
-    isProduction: (process.env.APP_ENV || 'production') === 'production',
-    host: process.env.HOST || '127.0.0.1',
-    port: number('PORT', 3000),
+    appEnv,
+    isProduction: appEnv === 'production',
+    host: resolveListenHost(appEnv),
+    port: number('PORT', number('LISTEN_PORT', 3000)),
     apiPublicUrl: process.env.API_PUBLIC_URL || 'https://api2.autisme.lu',
     corsOrigins: list('CORS_ORIGINS', ['https://namnam.autisme.lu']),
     db: {
@@ -94,4 +103,4 @@ export function validateEnv(env) {
   return missing;
 }
 
-export { parseEnvFile };
+export { parseEnvFile, resolveListenHost };

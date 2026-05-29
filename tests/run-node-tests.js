@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { parseEnvFile } from '../src/config/env.js';
+import { parseEnvFile, resolveListenHost } from '../src/config/env.js';
 import { addDays, isMonday, mondayFor, weekdaysForMonday, monthBounds } from '../src/utils/date.js';
 import { parseCsv } from '../src/utils/csv.js';
 import { hashPassword, verifyPassword } from '../src/infrastructure/password.js';
@@ -7,6 +7,7 @@ import { safeFileName } from '../src/infrastructure/file-storage.js';
 import { buildApp } from '../src/app.js';
 
 assert.deepEqual(parseEnvFile('A=1\nB="two"\n# ignored\nC=three'), { A: '1', B: 'two', C: 'three' });
+assert.equal(resolveListenHost('production'), '0.0.0.0');
 assert.equal(mondayFor('2026-06-03'), '2026-06-01');
 assert.equal(isMonday('2026-06-01'), true);
 assert.equal(addDays('2026-06-01', 4), '2026-06-05');
