@@ -46,17 +46,24 @@ const app = await buildApp({
 const htmlRoot = await app.inject({ method: 'GET', url: '/', headers: { accept: 'text/html' } });
 assert.equal(htmlRoot.statusCode, 200);
 assert.match(htmlRoot.headers['content-type'], /text\/html/);
-assert.match(htmlRoot.body, /api2\.autisme\.lu endpoints/);
+assert.match(htmlRoot.body, /api2\.autisme\.lu API explorer/);
 assert.match(htmlRoot.body, /\/docs\/openapi\.yaml/);
 
 const jsonRoot = await app.inject({ method: 'GET', url: '/', headers: { accept: 'application/json' } });
 assert.equal(jsonRoot.statusCode, 200);
-assert.equal(jsonRoot.json().docs, '/docs/openapi.yaml');
+assert.equal(jsonRoot.json().docs, '/docs');
+assert.equal(jsonRoot.json().openapi, '/docs/openapi.yaml');
 assert.ok(jsonRoot.json().endpointCount > 0);
 
 const docsRoot = await app.inject({ method: 'GET', url: '/docs', headers: { accept: 'text/html' } });
 assert.equal(docsRoot.statusCode, 200);
 assert.match(docsRoot.body, /Legacy compatibility/);
+assert.match(docsRoot.body, /Example request/);
+
+const routeJson = await app.inject({ method: 'GET', url: '/docs/routes.json', headers: { accept: 'application/json' } });
+assert.equal(routeJson.statusCode, 200);
+assert.equal(routeJson.json().routeInventory, '/docs/routes.json');
+assert.ok(routeJson.json().endpointCount > 0);
 
 await app.close();
 
